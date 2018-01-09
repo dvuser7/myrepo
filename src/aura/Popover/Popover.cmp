@@ -1,0 +1,75 @@
+<aura:component controller="PopoverController" implements="flexipage:availableForAllPageTypes" access="global">
+    <!--Input parameters to pass for this component-->
+    <aura:attribute name="sObjectAPIName" type="String" default="" description="The API name of the Object that display popup fields"/>
+    <aura:attribute name="sObjectRowId" type="String" default="" description="RowId of the Object"/>
+    <aura:attribute name="fieldsToShow" type="String" default="" description="Comma separated string that represnts fields to display. First element will be the title of the popup"/>
+    <aura:attribute name="iconName" type="String" default="standard:default" description="Icon for the popover"/>
+    <aura:attribute name="fieldLimit" type="Integer" default="5" description="Total number of fields to display"/>
+    <!--End Input-->
+    
+    <aura:attribute name="checkFlag" type="Boolean" default="true" description="Controls the visibility of the popover"/>
+    <aura:attribute name="result" type="Object[]" description="Output fields to display"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:registerEvent name="closePopover" type="c:ClosePopover" />
+    
+    <aura:if isTrue="{!v.checkFlag}">
+        <span aura:id="popup" role="dialog" style="position:absolute;">
+            <span class="slds-popover slds-popover_large slds-popover_panel tooltipcontainer slds-nubbin_left-top">
+                <button class="slds-button slds-button_icon slds-button_icon slds-button_icon-x-small slds-float_right slds-popover__close" title="Close" onclick="{!c.hidePopover}">
+                    <lightning:icon iconName="utility:close" size="x-small" variant="brand"/>
+                    <span class="slds-assistive-text">Close</span>
+                </button>
+                <div class="slds-popover__header">
+                    <header class="slds-media slds-media_center slds-m-bottom_small">
+                        <span class="slds-icon_container slds-media__figure">
+                            <lightning:icon iconName="{!v.iconName}" size="large" variant="inverse" />
+                        </span>
+                        <div class="slds-media__body">
+                            <h2 class="slds-text-heading_medium slds-hyphenate slds-truncate" id="panel-heading-id"><a onclick="{!c.navigateToRecord}" title="{!v.result[0].value}">{!v.result[0].value}</a></h2>
+                        </div>
+                    </header>
+                    <footer class="slds-grid slds-wrap slds-grid_pull-padded">
+                        <aura:iteration items="{!v.result}" var="rec" indexVar="fieldIdx">
+                            <aura:if isTrue="{!fieldIdx == 0}">
+                                <aura:set attribute="else">
+                                    <div class="slds-p-horizontal_small slds-size_1-of-2 slds-p-bottom_x-small">
+                                        <dl>
+                                            <dt>
+                                                <p class="slds-text-color_weak slds-truncate" title="{!rec.title}">{!rec.title}</p>
+                                            </dt>
+                                            <dd>
+                                                <p class="slds-text-color_bold slds-truncate">
+                                                    <aura:if isTrue="{!rec.dataType == 'BOOLEAN'}">
+                                                        <ui:outputCheckbox value="{!rec.value}" />
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!rec.dataType == 'DATETIME'}">
+                                                        <ui:outputDateTime value="{!rec.value}" />
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!rec.dataType == 'PHONE'}">
+                                                        <ui:outputPhone value="{!rec.value}" />
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!rec.dataType == 'EMAIL'}">
+                                                        <ui:outputEmail value="{!rec.value}" />
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!and(and(and(rec.dataType != 'BOOLEAN', rec.dataType != 'DATETIME'), rec.dataType != 'PHONE'), rec.dataType != 'EMAIL')}">
+                                                        <!-- Display hyperlink for relation fields -->
+                                                        <aura:if isTrue="{!not(empty(rec.targetId))}">
+                                                            <a data-id="{!rec.targetId}" onclick="{!c.navigateToRecord}"><ui:outputText title="{!rec.value}" value="{!rec.value}" /></a>
+                                                            <aura:set attribute="else">
+                                                                <ui:outputText value="{!rec.value}" />
+                                                            </aura:set>
+                                                        </aura:if>
+                                                    </aura:if>
+                                                </p>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                        </aura:iteration>
+                    </footer>
+                </div>
+            </span>
+        </span>
+    </aura:if>
+</aura:component>

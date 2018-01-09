@@ -1,0 +1,6 @@
+.THIS .tooltipcontainer {
+    position: relative;
+    display: inline-block;
+    top: -28px;
+    left: 10px;
+}
